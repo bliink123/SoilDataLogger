@@ -3,28 +3,27 @@
 import serial
 import time
 import os
-import time 
+import time
 from time import sleep
 from datetime import datetime
 
-ser = serial.Serial('/dev/ttyACM2', 9600)
+port = '/dev/ttyACM2'
+timeout = 10
 
-file = open("data_log.csv", "a")
+ser = serial.Serial(port, 9600, timeout=timeout)
 
-#varl = 'temp'
+with open("data_log.csv", "a") as file:
+    if os.stat("data_log.csv").st_size == 0:
+        file.write("Time\tSensor1\n")
 
-if os.stat("data_log.csv").st_size == 0:
-        file.write("Time,Sensor1\n")
-while True:
-		varl = ser.readline()
-		time.sleep(1)
-		varl = varl.decode('utf-8')
-		#varl = varl.replace("\r'\n'",'')
-		#varl = varl.replace("b'",'')
-		now = datetime.now()
-		print("Writting Reading - "+str(now))
-		file.write(time	.strftime('%l:%M%p on %b %d %Y')+","+str(varl)+","+"\n")
-		file.flush()
-		time.sleep(60)
-		#file.close()
+    while True:
+        varl = ser.readline().decode('utf-8')
+        if len(varl) > 0:
+            #varl = varl.replace("\r'\n'",'')
+            #varl = varl.replace("b'",'')
+            print("Writing Reading - " + str(datetime.now()))
+            file.write(time.strftime('%l:%M%p on %b %d %Y') + "\t" + str(varl) + "\n")
+        else:
+            file.write(time.strftime('%l:%M%p on %b %d %Y') + "\t" + str(timeout),
+			+ "second timeout reading from serial " + port + "\n")
 		
